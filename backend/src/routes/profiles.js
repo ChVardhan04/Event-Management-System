@@ -5,10 +5,23 @@ const Event = require("../models/Event");
 
 
 router.post("/", async (req, res) => {
-  const { name, timezone } = req.body;
-  const profile = await Profile.create({ name, timezone });
-  res.status(201).json(profile);
+  try {
+    const { name, timezone } = req.body;
+
+    const existing = await Profile.findOne({ name });
+    if (existing) {
+      return res.status(400).json({
+        msg: "Profile with this name already exists",
+      });
+    }
+
+    const profile = await Profile.create({ name, timezone });
+    res.status(201).json(profile);
+  } catch (err) {
+    res.status(500).json({ msg: err.message });
+  }
 });
+
 
 
 router.get("/", async (req, res) => {
